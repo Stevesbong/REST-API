@@ -16,7 +16,10 @@ const app = express();
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
+app.use(express.json());
+
 // TODO setup your api routes here
+app.use('/api', usersRoute, coursesRoute);
 
 // setup a friendly greeting for the root route
 app.get('/', (req, res) => {
@@ -39,7 +42,6 @@ app.get('/', (req, res) => {
   }
 })();
 
-app.use('/api', usersRoute);
 
 // send 404 if no other route matched
 app.use((req, res) => {

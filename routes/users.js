@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { User } = require('../db/index').models;
 
+// Validations and Encrypt password
 const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth');
 
@@ -51,34 +52,43 @@ const authenticateUser = async (req, res, next) => {
     }
   };
 
-
+// Returns the current auth user
 router.get('/users', authenticateUser, asyncHandler( async (req, res, next) => {
-    console.log('hi', req.currentUser)
-    const { firstName, lastName, emailAddress } = req.currentUser;
-    
-    res.json({
-      firstName,
-      lastName,
-      emailAddress,
-    });
+    const { currentUser } = req;
+    const user = await User.findByPk(currentUser.id, {
+        attributes: {
+            exclude: ['password', 'createdAt', 'updatedAt']
+        }
+    })
+
+    res.status(200).json(user)
 }));
 
+// Route that creates a new user.
 router.post('/users', asyncHandler( async (req, res, next) => {
-    const user = req.body;
-
-    if(user.password) {
-        user.password = bcryptjs.hashSync(user.password)
-    };
-
     try {
+        const user = req.body;
+
+        // hash password with bcryptjs
+        if(user.password) {
+            user.password = bcryptjs.hashSync(user.password);
+        };
         await User.create(user);
+
+        // Set the status to 201 Created and end the response.
         res.status(201).location('/').end();
     } catch (error) {
-        if(error.name === 'SequelizeValidationError') {
-            const errorMessage = [];
+        const errorMessage = [];
 
+        // If sequelize validation error issue
+        if(error.name === 'SequelizeValidationError') {
             error.errors.map( err => errorMessage.push(err.message));
-            res.status(400).json({error: errorMessage})
+            res.status(400).json({error: errorMessage});
+
+        // If Email address is not unique
+        } else if(error.name === 'SequelizeUniqueConstraintError') {
+            error.errors.map( err => errorMessage.push(err.message))
+            res.status(400).json({error: errorMessage});
         } else {
             next(error);
         }

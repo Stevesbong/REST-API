@@ -30,12 +30,14 @@ module.exports = (sequelize) => {
         emailAddress: {
             type: Sequelize.STRING,
             allowNull: false,
+            // check the email uniqueness.
+            unique: true,
             validate: {
                 notEmpty: {
                     msg: 'Please provide an Email.'
                 },
-                is: {
-                    args: /^[A-Z0-9+_.-]+@[A-Z0-9.-]+$/,
+                // check if email is valid email.
+                isEmail: {
                     msg: 'Please provide a valid Email.'
                 }
             }
