@@ -40,6 +40,10 @@ module.exports = (sequelize) => {
         materialsNeeded: {
             type: Sequelize.STRING,
             allowNull: true,
+        },
+        userId: {
+            type: Sequelize.INTEGER,
+            allowNull: false
         }
     }, { sequelize });
 

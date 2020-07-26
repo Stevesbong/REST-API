@@ -56,7 +56,7 @@ const authenticateUser = async (req, res, next) => {
 };
 
 // Return all courses.
-router.get('/courses', authenticateUser, asyncHandler( async (req, res, next) => {
+router.get('/courses', asyncHandler( async (req, res, next) => {
     const courses = await Course.findAll({
         attributes: {
             exclude: ['createdAt', 'updatedAt']
@@ -64,6 +64,9 @@ router.get('/courses', authenticateUser, asyncHandler( async (req, res, next) =>
         include: {
             model: User,
             as: 'user',
+            attributes: {
+                exclude: ['password', 'createdAt', 'updatedAt']
+            }
         }
     });
     res.status(200).json({courses})
